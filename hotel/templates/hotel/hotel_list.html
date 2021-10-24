@@ -1,0 +1,16 @@
+{% extends "hotel/base.html" %}
+{% block content %}
+    {% for hotel in object_list %}
+        <article class="media content-section">
+        <img class="rounded-circle article-img" src="{{ hotel.author.profile.image.url }}">
+          <div class="media-body">
+            <div class="article-metadata">
+              <a class="mr-2" href="#">{{ hotel.author }}</a>
+              <small class="text-muted">{{ hotel.address}}</small>
+            </div>
+            <h2><a class="article-title" href="{% url 'hotel-detail' hotel.id %}">{{ hotel.name }}</a></h2>
+            <p class="article-content">{{ hotel.web_url }}</p>
+          </div>
+        </article>
+    {% endfor %}
+{% endblock content %}
