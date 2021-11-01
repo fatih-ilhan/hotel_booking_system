@@ -30,7 +30,7 @@ try:
 
     show_table_command = """ SELECT * FROM HOTEL; """
 
-    cursor.execute(delete_hotel_table_command)
+    # cursor.execute(delete_hotel_table_command)
     cursor.execute(create_hotel_table_command)
 
     df = format_hotels_data()

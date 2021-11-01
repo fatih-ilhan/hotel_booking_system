@@ -17,9 +17,7 @@ class HotelListView(ListView):
 
     def get_queryset(self):  # new
         query = self.request.GET.get('q')
-        hotel_list = Hotel.objects.filter(
-            Q(name__icontains=query) | Q(address__icontains=query)
-        )
+        hotel_list = Hotel.objects.raw(f"SELECT * FROM HOTEL WHERE address LIKE '%%{query}%%' OR name LIKE '%%{query}%%'")
         return hotel_list
 
 
@@ -32,7 +30,7 @@ class HotelCreateView(LoginRequiredMixin, CreateView):
     fields = ['name', 'web_url']
 
     def form_valid(self, form):
-        form.instance.author = self.request.user
+        form.instance.manager = self.request.user
         return super().form_valid(form)
 
 
@@ -41,12 +39,12 @@ class HotelUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     fields = ['name', 'web_url']
 
     def form_valid(self, form):
-        form.instance.author = self.request.user
+        form.instance.manager = self.request.user
         return super().form_valid(form)
 
     def test_func(self):
         hotel = self.get_object()
-        return self.request.user == hotel.author
+        return self.request.user == hotel.manager
 
 
 class HotelDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -55,7 +53,7 @@ class HotelDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         hotel = self.get_object()
-        return self.request.user == hotel.author
+        return self.request.user == hotel.manager
 
 
 def about(request):

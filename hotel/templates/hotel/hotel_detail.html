@@ -1,12 +1,11 @@
 {% extends "hotel/base.html" %}
 {% block content %}
     <article class="media content-section">
-      <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
       <div class="media-body">
         <div class="article-metadata">
-          <a class="mr-2" href="#">{{ object.author }}</a>
+          <a class="mr-2" href="#">{{ object.manager }}</a>
           <small class="text-muted">{{ object.address }}</small>
-            {% if object.author == user %}
+            {% if object.manager == user %}
               <div>
                 <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'hotel-update' object.id%}">Update</a>
                 <a class="btn btn-dangerous btn-sm mt-1 mb-1" href="{% url 'hotel-delete' object.id%}">Delete</a>
