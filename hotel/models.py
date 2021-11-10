@@ -13,7 +13,19 @@ class Hotel(models.Model):
     zip_code = models.BigIntegerField(blank=True, null=True)
     phone = models.TextField(blank=True, null=True)
     web_url = models.TextField(blank=True, null=True)
+    manager = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'HOTEL'
+        db_table = 'hotel'
+
+
+class Room(models.Model):
+    room_no = models.PositiveIntegerField()
+    num_people = models.PositiveIntegerField()
+    price = models.PositiveIntegerField()
+    hotel = models.ForeignKey(Hotel, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'room'

@@ -1,0 +1,11 @@
+{% extends "hotel/base.html" %}
+{% block content %}
+  <div class="content-section">
+    <form action="{% url 'hotel-list' %}" method="get">
+      <input name="q" type="text" placeholder="Search...">
+      <input name="start_date" type="date" placeholder="Check-in date">
+      <input name="end_date" type="date" placeholder="Check-out date">
+      <input name="num_people" type="date" placeholder="Number of people">
+    </form>
+  </div>
+{% endblock content %}

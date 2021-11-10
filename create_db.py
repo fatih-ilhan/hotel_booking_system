@@ -15,7 +15,7 @@ try:
 
     cursor = connection.cursor()
 
-    create_hotel_table_command = """ CREATE TABLE HOTEL
+    create_hotel_table_command = """ CREATE TABLE hotel
                                     (
                                       id              INT unsigned NOT NULL AUTO_INCREMENT,
                                       name            VARCHAR(150) NOT NULL,
@@ -23,19 +23,33 @@ try:
                                       zip_code        VARCHAR(10) NOT NULL,
                                       phone           VARCHAR(15) NOT NULL,
                                       web_url         VARCHAR(500),
+                                      manager_id      BIGINT DEFAULT 2,
+                                      FOREIGN KEY     (manager_id) REFERENCES users_user(id),
                                       PRIMARY KEY     (id)
                                     ); 
                                  """
-    delete_hotel_table_command = """ DROP TABLE HOTEL; """
+    delete_table_command = """ DROP TABLE room; """
 
-    show_table_command = """ SELECT * FROM HOTEL; """
+    show_table_command = """ SELECT * FROM room; """
 
-    # cursor.execute(delete_hotel_table_command)
-    cursor.execute(create_hotel_table_command)
+    create_room_table_command = """ CREATE TABLE room
+                                    (
+                                      id              INT unsigned NOT NULL AUTO_INCREMENT,
+                                      room_no         INT unsigned NOT NULL,
+                                      num_people      INT unsigned NOT NULL,
+                                      price           INT unsigned NOT NULL,
+                                      hotel_id        INT unsigned NOT NULL,
+                                      FOREIGN KEY     (hotel_id) REFERENCES hotel(id),
+                                      PRIMARY KEY     (id)
+                                    ); 
+                                 """
 
-    df = format_hotels_data()
-    df = df[df.name.isnull() == False]
-    df.to_sql(con=con, name='HOTEL', if_exists='append', index=False, index_label='id')
+    cursor.execute(delete_table_command)
+    cursor.execute(create_room_table_command)
+
+    # df = format_hotels_data()
+    # df = df[df.name.isnull() == False]
+    # df.to_sql(con=con, name='hotel', if_exists='append', index=False, index_label='id')
 
     result = engine.execute(show_table_command).fetchall()
 

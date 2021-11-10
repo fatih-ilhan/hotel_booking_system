@@ -4,8 +4,7 @@
         <article class="media content-section">
           <div class="media-body">
             <div class="article-metadata">
-              <a class="mr-2" href="#">{{ hotel.name }}</a>
-              <small class="text-muted">{{ hotel.address}}</small>
+              <small class="text-muted">{{ hotel.address }}{{', '}}{{ hotel.zip_code }}</small>
             </div>
             <h2><a class="article-title" href="{% url 'hotel-detail' hotel.id %}">{{ hotel.name }}</a></h2>
             <p class="article-content">{{ hotel.web_url }}</p>
