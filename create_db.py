@@ -44,8 +44,22 @@ try:
                                     ); 
                                  """
 
-    cursor.execute(delete_table_command)
-    cursor.execute(create_room_table_command)
+    create_reservation_table_command = """ CREATE TABLE reservation
+                                          (
+                                            id              INT unsigned NOT NULL AUTO_INCREMENT,
+                                            res_date        DATE NOT NULL,
+                                            start_date      DATE NOT NULL,
+                                            end_date        DATE NOT NULL,
+                                            customer_id     BIGINT NOT NULL,
+                                            room_id         INT unsigned NOT NULL,
+                                            FOREIGN KEY     (customer_id) REFERENCES users_user(id),
+                                            FOREIGN KEY     (room_id) REFERENCES room(id),
+                                            PRIMARY KEY     (id)
+                                          ); 
+                                       """
+
+    # cursor.execute(delete_table_command)
+    cursor.execute(create_reservation_table_command)
 
     # df = format_hotels_data()
     # df = df[df.name.isnull() == False]
