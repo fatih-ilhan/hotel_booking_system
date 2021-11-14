@@ -34,7 +34,6 @@ AUTH_USER_MODEL = 'users.User'
 
 INSTALLED_APPS = [
     'hotel.apps.HotelConfig',
-    'reservation.apps.ReservationConfig',
     'users.apps.UsersConfig',
     'crispy_forms',
     'django.contrib.admin',

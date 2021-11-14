@@ -4,14 +4,14 @@
       <div class="media-body">
         <div class="article-metadata">
           <h2 class="article-title">{{ hotel.name }}</h2>
-            {% if hotel.manager_id == user.id %}
+            {% if user.is_hotel_manager and hotel.manager_id == user.id %}
               <div>
                 <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'hotel-update' object.id%}">Update</a>
                 <a class="btn btn-dangerous btn-sm mt-1 mb-1" href="{% url 'hotel-delete' object.id%}">Delete</a>
               </div>
             {% endif %}
         </div>
-        <p class="article-web_url">{{ object.web_url }}</p>
+        <p class="article-web_url">{{ hotel.web_url }}</p>
         <p class="text-muted">{{ hotel.address }}{{', '}}{{ hotel.zip_code }}</p>
         <p class="text-muted">{{ hotel.phone }}</p>
       </div>

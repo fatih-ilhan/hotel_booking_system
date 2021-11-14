@@ -35,6 +35,8 @@
               {% if user.is_authenticated %}
                 {% if user.is_hotel_manager %}
                   <a class="nav-item nav-link" href="{% url 'hotel-create' %}">New Hotel</a>
+                {% else %}
+                  <a class="nav-item nav-link" href="{% url 'reservation-list' %}">My Reservations</a>
                 {% endif %}
                 <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
                 <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>

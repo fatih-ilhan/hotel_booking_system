@@ -6,7 +6,14 @@
             <div class="article-metadata">
               <small class="text-muted">{{ hotel.address }}{{', '}}{{ hotel.zip_code }}</small>
             </div>
-            <h2><a class="article-title" href="{% url 'hotel-detail' hotel.id %}">{{ hotel.name }}</a></h2>
+            {% if user.is_hotel_manager %}
+              <h2><a class="article-title" href="{% url 'hotel-detail' hotel.id %}">{{ hotel.name }}</a></h2>
+            {% else %}
+              <h2><a class="article-title">{{ hotel.name }}</a></h2>
+              <a class="btn btn-secondary btn-sm mt-1 mb-1"
+                 href="/reservation/new/?hotel_id={{hotel.id}}&hotel_name={{hotel.name}}&start_date={{res_data.start_date}}&end_date={{res_data.end_date}}&num_people={{res_data.num_people}}">Book</a>
+              <p class="article-content">{{'$'}}{{ hotel.price }}</p>
+            {% endif %}
             <p class="article-content">{{ hotel.web_url }}</p>
           </div>
         </article>

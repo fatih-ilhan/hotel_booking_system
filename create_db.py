@@ -1,8 +1,8 @@
+import random
+
 import mysql.connector
+from django.db import connection
 from sqlalchemy import create_engine
-
-from format_data import format_hotels_data
-
 
 try:
     connection = mysql.connector.connect(host='localhost',
@@ -28,7 +28,8 @@ try:
                                       PRIMARY KEY     (id)
                                     ); 
                                  """
-    delete_table_command = """ DROP TABLE room; """
+    delete_room_table_command = """ DROP TABLE room; """
+    delete_reservation_table_command = """ DROP TABLE reservation; """
 
     show_table_command = """ SELECT * FROM room; """
 
@@ -58,8 +59,25 @@ try:
                                           ); 
                                        """
 
-    # cursor.execute(delete_table_command)
+    cursor.execute(delete_reservation_table_command)
+    cursor.execute(delete_room_table_command)
+    cursor.execute(create_room_table_command)
     cursor.execute(create_reservation_table_command)
+
+    fill_rooms = True
+    if fill_rooms:
+        for hotel_id in range(1, 169):
+            price_1 = random.randint(75, 300)
+            num_room_1 = random.randint(10, 30)
+            price_2 = int(price_1 * random.uniform(1.5, 2))
+            num_room_2 = random.randint(20, 100)
+            for i in range(num_room_1):
+                cursor.execute("INSERT INTO room(room_no, num_people, price, hotel_id) VALUES(%s, %s, %s, %s)",
+                               [i+1, 1, price_1, hotel_id])
+            for i in range(num_room_2):
+                cursor.execute("INSERT INTO room(room_no, num_people, price, hotel_id) VALUES(%s, %s, %s, %s)",
+                               [num_room_1+i+1, 2, price_2, hotel_id])
+        connection.commit()
 
     # df = format_hotels_data()
     # df = df[df.name.isnull() == False]

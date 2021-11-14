@@ -29,3 +29,17 @@ class Room(models.Model):
     class Meta:
         managed = False
         db_table = 'room'
+
+
+class Reservation(models.Model):
+
+    id = models.BigIntegerField(blank=True, null=False, primary_key=True)
+    res_date = models.DateField(blank=True, null=True)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    customer = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True)
+    room = models.ForeignKey(Room, models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'reservation'
