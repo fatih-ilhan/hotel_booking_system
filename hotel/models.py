@@ -32,14 +32,22 @@ class Room(models.Model):
 
 
 class Reservation(models.Model):
-
-    id = models.BigIntegerField(blank=True, null=False, primary_key=True)
-    res_date = models.DateField(blank=True, null=True)
-    start_date = models.DateField(blank=True, null=True)
-    end_date = models.DateField(blank=True, null=True)
-    customer = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True)
-    room = models.ForeignKey(Room, models.DO_NOTHING, blank=True, null=True)
+    res_date = models.DateField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    customer = models.ForeignKey(User, models.DO_NOTHING)
+    hotel = models.ForeignKey(Hotel, models.DO_NOTHING)
+    price = models.PositiveIntegerField()
 
     class Meta:
         managed = False
         db_table = 'reservation'
+
+
+class ReservedRoom(models.Model):
+    res = models.ForeignKey(Reservation, models.DO_NOTHING)
+    room = models.ForeignKey(Room, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'reserved_room'

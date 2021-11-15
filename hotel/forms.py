@@ -16,7 +16,7 @@ class HotelCreateForm(ModelForm):
     def save(self, commit=True):
         hotel = super(ModelForm, self).save(commit=True)
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id FROM hotel ORDER BY id DESC LIMIT 1')  # TODO: if no row exists?
+            cursor.execute('SELECT LAST_INSERT_ID() INTO @hotel;')  # TODO: if no row exists?
             hotel_id = cursor.fetchone()[0]
             for room_no in range(1, self.cleaned_data['num_rooms_1']+1):
                 cursor.execute("INSERT INTO room(room_no, num_people, price, hotel_id) VALUES(%s, %s, %s, %s)",
@@ -43,7 +43,7 @@ class ReservationCreateForm(ModelForm):
 
     class Meta:
         model = Reservation
-        fields = ['start_date', 'end_date', 'room', 'customer']
+        fields = ['start_date', 'end_date', 'hotel', 'customer']
 
     def save(self, commit=True):
         reservation = super(ModelForm, self).save(commit=True)

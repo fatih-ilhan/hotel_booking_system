@@ -30,6 +30,7 @@ try:
                                  """
     delete_room_table_command = """ DROP TABLE room; """
     delete_reservation_table_command = """ DROP TABLE reservation; """
+    delete_reserved_room_table_command = """ DROP TABLE reserved_room; """
 
     show_table_command = """ SELECT * FROM room; """
 
@@ -52,31 +53,45 @@ try:
                                             start_date      DATE NOT NULL,
                                             end_date        DATE NOT NULL,
                                             customer_id     BIGINT NOT NULL,
-                                            room_id         INT unsigned NOT NULL,
+                                            hotel_id        INT unsigned NOT NULL,
+                                            price           INT unsigned NOT NULL,
                                             FOREIGN KEY     (customer_id) REFERENCES users_user(id),
-                                            FOREIGN KEY     (room_id) REFERENCES room(id),
+                                            FOREIGN KEY     (hotel_id) REFERENCES hotel(id),
                                             PRIMARY KEY     (id)
                                           ); 
                                        """
 
+    create_reserved_room_table_command = """ CREATE TABLE reserved_room
+                                            (
+                                              id              INT unsigned NOT NULL AUTO_INCREMENT,
+                                              res_id          INT unsigned NOT NULL,
+                                              room_id         INT unsigned NOT NULL,
+                                              FOREIGN KEY     (res_id) REFERENCES reservation(id),
+                                              FOREIGN KEY     (room_id) REFERENCES room(id),
+                                              PRIMARY KEY     (id)
+                                            ); 
+                                         """
+
+    cursor.execute(delete_reserved_room_table_command)
     cursor.execute(delete_reservation_table_command)
     cursor.execute(delete_room_table_command)
     cursor.execute(create_room_table_command)
     cursor.execute(create_reservation_table_command)
+    cursor.execute(create_reserved_room_table_command)
 
     fill_rooms = True
     if fill_rooms:
         for hotel_id in range(1, 169):
             price_1 = random.randint(75, 300)
-            num_room_1 = random.randint(10, 30)
+            num_rooms_1 = random.randint(10, 30)
             price_2 = int(price_1 * random.uniform(1.5, 2))
-            num_room_2 = random.randint(20, 100)
-            for i in range(num_room_1):
+            num_rooms_2 = random.randint(20, 100)
+            for i in range(num_rooms_1):
                 cursor.execute("INSERT INTO room(room_no, num_people, price, hotel_id) VALUES(%s, %s, %s, %s)",
                                [i+1, 1, price_1, hotel_id])
-            for i in range(num_room_2):
+            for i in range(num_rooms_2):
                 cursor.execute("INSERT INTO room(room_no, num_people, price, hotel_id) VALUES(%s, %s, %s, %s)",
-                               [num_room_1+i+1, 2, price_2, hotel_id])
+                               [num_rooms_1+i+1, 2, price_2, hotel_id])
         connection.commit()
 
     # df = format_hotels_data()
