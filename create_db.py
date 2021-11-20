@@ -4,6 +4,9 @@ import mysql.connector
 from django.db import connection
 from sqlalchemy import create_engine
 
+from format_data import format_findhotel_data
+
+
 try:
     connection = mysql.connector.connect(host='localhost',
                                          database='hbms',
@@ -20,14 +23,17 @@ try:
                                       id              INT unsigned NOT NULL AUTO_INCREMENT,
                                       name            VARCHAR(150) NOT NULL,
                                       address         VARCHAR(150) NOT NULL,
-                                      zip_code        VARCHAR(10) NOT NULL,
-                                      phone           VARCHAR(15) NOT NULL,
+                                      zip_code        VARCHAR(10),
+                                      phone           VARCHAR(15),
                                       web_url         VARCHAR(500),
+                                      rating          FLOAT,
+                                      num_review      INT unsigned,
                                       manager_id      BIGINT DEFAULT 2,
                                       FOREIGN KEY     (manager_id) REFERENCES users_user(id),
                                       PRIMARY KEY     (id)
                                     ); 
                                  """
+    delete_hotel_table_command = """ DROP TABLE hotel; """
     delete_room_table_command = """ DROP TABLE room; """
     delete_reservation_table_command = """ DROP TABLE reservation; """
     delete_reserved_room_table_command = """ DROP TABLE reserved_room; """
@@ -55,6 +61,7 @@ try:
                                             customer_id     BIGINT NOT NULL,
                                             hotel_id        INT unsigned NOT NULL,
                                             price           INT unsigned NOT NULL,
+                                            rating          SMALLINT,
                                             FOREIGN KEY     (customer_id) REFERENCES users_user(id),
                                             FOREIGN KEY     (hotel_id) REFERENCES hotel(id),
                                             PRIMARY KEY     (id)
@@ -75,17 +82,26 @@ try:
     cursor.execute(delete_reserved_room_table_command)
     cursor.execute(delete_reservation_table_command)
     cursor.execute(delete_room_table_command)
+    cursor.execute(delete_hotel_table_command)
+
+    cursor.execute(create_hotel_table_command)
+    df = format_findhotel_data()
+    df = df[~df.name.isnull()]
+    prices = df.price
+    df.drop('price', axis=1, inplace=True)
+    df.to_sql(con=con, name='hotel', index=False, index_label='id', if_exists='append')
+
     cursor.execute(create_room_table_command)
     cursor.execute(create_reservation_table_command)
     cursor.execute(create_reserved_room_table_command)
 
     fill_rooms = True
     if fill_rooms:
-        for hotel_id in range(1, 169):
-            price_1 = random.randint(75, 300)
-            num_rooms_1 = random.randint(10, 30)
-            price_2 = int(price_1 * random.uniform(1.5, 2))
+        for hotel_id in range(1, len(df)+1):
+            price_2 = int(prices[hotel_id-1].replace(',', ''))
             num_rooms_2 = random.randint(20, 100)
+            price_1 = int(price_2 * random.uniform(0.5, 1))
+            num_rooms_1 = random.randint(10, 30)
             for i in range(num_rooms_1):
                 cursor.execute("INSERT INTO room(room_no, num_people, price, hotel_id) VALUES(%s, %s, %s, %s)",
                                [i+1, 1, price_1, hotel_id])
@@ -93,10 +109,6 @@ try:
                 cursor.execute("INSERT INTO room(room_no, num_people, price, hotel_id) VALUES(%s, %s, %s, %s)",
                                [num_rooms_1+i+1, 2, price_2, hotel_id])
         connection.commit()
-
-    # df = format_hotels_data()
-    # df = df[df.name.isnull() == False]
-    # df.to_sql(con=con, name='hotel', if_exists='append', index=False, index_label='id')
 
     result = engine.execute(show_table_command).fetchall()
 

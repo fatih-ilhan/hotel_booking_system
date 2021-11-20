@@ -1,0 +1,21 @@
+{% extends "hotel/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        {% if user.is_authenticated %}
+            <form method="POST">
+                {% csrf_token %}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">Book</legend>
+                    {{ form|crispy }}
+                </fieldset>
+                <div class="form-group">
+                    <button class="btn btn-outline-secondary" type="submit">Yes, Confirm</button>
+                    <a class="btn btn-outline-secondary" href="{% url 'hotel-home' %}">Cancel</a>
+                </div>
+            </form>
+        {% else %}
+            <h2>Please login first to make a reservation!</h2>
+        {% endif %}
+    </div>
+{% endblock content %}

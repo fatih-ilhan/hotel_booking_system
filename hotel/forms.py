@@ -3,6 +3,7 @@ from django.forms import ModelForm
 from django.db import connection
 
 from .models import Hotel, Reservation
+from .utils.room_utils import filter_rooms
 
 
 class HotelCreateForm(ModelForm):
@@ -55,6 +56,20 @@ class ReservationUpdateForm(ModelForm):
     class Meta:
         model = Reservation
         fields = ['start_date', 'end_date']
+
+    def save(self, commit=True):
+        # TODO: check the availability of new dates, assign new room if necessary
+        # room_list_ = filter_rooms(hotel_id, start_date, end_date, num_people, num_rooms)
+
+        reservation = super(ModelForm, self).save(commit=True)
+        return reservation
+
+
+class ReservationRateForm(ModelForm):
+
+    class Meta:
+        model = Reservation
+        fields = ['rating']
 
     def save(self, commit=True):
         reservation = super(ModelForm, self).save(commit=True)

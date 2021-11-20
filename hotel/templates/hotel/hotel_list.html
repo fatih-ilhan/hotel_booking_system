@@ -1,5 +1,22 @@
 {% extends "hotel/base.html" %}
 {% block content %}
+    {% if '&order_by' in request.get_full_path %}
+        {% with request.get_full_path|slice:":-15" as path %}
+            <a href="{{path}}&order_by=rate_"><button>Sort by rating</button></a>
+            <a href="{{path}}&order_by=price"><button>Sort by price</button></a>
+            <a href="{{path}}&order_by=name_"><button>Sort by name</button></a>
+            <a href="{{path}}&order_by=pop__"><button>Sort by popularity</button></a>
+        {% endwith %}
+    {% else %}
+        {% with request.get_full_path as path %}
+            <a href="{{path}}&order_by=rate_"><button>Sort by rating</button></a>
+            <a href="{{path}}&order_by=price"><button>Sort by price</button></a>
+            <a href="{{path}}&order_by=name_"><button>Sort by name</button></a>
+            <a href="{{path}}&order_by=pop__"><button>Sort by popularity</button></a>
+        {% endwith %}
+    {% endif %}
+
+
     {% for hotel in object_list %}
         <article class="media content-section">
           <div class="media-body">
@@ -10,11 +27,12 @@
               <h2><a class="article-title" href="{% url 'hotel-detail' hotel.id %}">{{ hotel.name }}</a></h2>
             {% else %}
               <h2><a class="article-title">{{ hotel.name }}</a></h2>
+              <p class="article-content">{{'URL: '}}{{ hotel.web_url }}</p>
+              <p class="article-content">{{'Rating: '}}{{ hotel.rating }}{{'/10 with '}}{{ hotel.num_review }}{{' reviews'}}</p>
+              <p class="article-content">{{'$'}}{{ hotel.price }}</p>
               <a class="btn btn-secondary btn-sm mt-1 mb-1"
                  href="/reservation/new/?hotel_id={{hotel.id}}&hotel_name={{hotel.name}}&start_date={{res_data.start_date}}&end_date={{res_data.end_date}}&num_people={{res_data.num_people}}">Book</a>
-              <p class="article-content">{{'$'}}{{ hotel.price }}</p>
             {% endif %}
-            <p class="article-content">{{ hotel.web_url }}</p>
           </div>
         </article>
     {% endfor %}

@@ -1,3 +1,7 @@
+from django.db import connection
+from hotel.models import Room
+
+
 class Node:
     def __init__(self, data=None, children=None):
         self.data = data
@@ -75,3 +79,33 @@ def check_room_comb(room_comb, room_list):
         return []
     else:
         return room_list_
+
+
+def filter_rooms(hotel_id, start_date, end_date, num_people, num_rooms):
+    room_list = Room.objects.raw("SELECT * FROM room WHERE hotel_id = %s", [hotel_id])
+    num_rooms = min(num_people, num_rooms)
+
+    room_combs = get_room_combs(num_people, num_rooms)
+    if room_combs:
+        room_comb = room_combs[0]
+    else:
+        return []
+
+    room_list_ = []
+    with connection.cursor() as cursor:
+        for room in room_list:
+            cursor.execute(f"SELECT res_id FROM reserved_room WHERE room_id = %s", [room.id])
+            res_id_tuple = cursor.fetchall()
+            if res_id_tuple:
+                cursor.execute(f"SELECT * FROM reservation WHERE id IN %s "
+                               f"AND (CAST(%s AS DATE) <= start_date AND start_date < CAST(%s AS DATE)"
+                               f" OR CAST(%s AS DATE) < end_date AND end_date <= CAST(%s AS DATE))",
+                               [res_id_tuple, start_date, end_date, start_date, end_date])
+                res_list = cursor.fetchall()
+            else:
+                res_list = ()
+            if not res_list:
+                room_list_.append(room)
+
+    room_list_ = check_room_comb(room_comb, room_list_)
+    return room_list_

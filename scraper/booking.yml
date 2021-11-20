@@ -1,0 +1,31 @@
+hotel:
+    css: div.css-1t3tw8t
+    xpath: null
+    multiple: true
+    type: Text
+    children:
+        name:
+            css: span.css-1pnhf38
+            xpath: null
+            multiple: true
+            type: Text
+        price:
+            css: div.css-a1yfha span
+            xpath: null
+            multiple: true
+            type: Text
+        address:
+            css: div.css-10kyyc4
+            xpath: null
+            multiple: true
+            type: Text
+        rating:
+            css: span.e17i7uwn1
+            xpath: null
+            multiple: true
+            type: Text
+        num_review:
+            css: div.css-sbghnz span
+            xpath: null
+            multiple: true
+            type: Text

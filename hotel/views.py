@@ -1,45 +1,15 @@
-from django.shortcuts import render
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from django.db.models import Q
-from django.db import connection
 from datetime import date
-from django.urls import reverse_lazy
+
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import connection
 from django.shortcuts import redirect
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 
-from .forms import HotelCreateForm, HotelUpdateForm, ReservationUpdateForm
-from .models import Hotel, Reservation, ReservedRoom, Room
-from .utils.room_utils import check_room_comb, get_room_combs
-
-
-def filter_rooms(hotel_id, start_date, end_date, num_people, num_rooms):
-    room_list = Room.objects.raw("SELECT * FROM room WHERE hotel_id = %s", [hotel_id])
-    num_rooms = min(num_people, num_rooms)
-
-    room_combs = get_room_combs(num_people, num_rooms)
-    if room_combs:
-        room_comb = room_combs[0]
-    else:
-        return []
-
-    room_list_ = []
-    with connection.cursor() as cursor:
-        for room in room_list:
-            cursor.execute(f"SELECT res_id FROM reserved_room")
-            res_id_tuple = cursor.fetchall()
-            if res_id_tuple:
-                cursor.execute(f"SELECT * FROM reservation WHERE id IN %s "
-                               f"AND (CAST(%s AS DATE) <= start_date AND start_date < CAST(%s AS DATE)"
-                               f" OR CAST(%s AS DATE) < end_date AND end_date <= CAST(%s AS DATE))",
-                               [res_id_tuple, start_date, end_date, start_date, end_date])
-                res_list = cursor.fetchall()
-            else:
-                res_list = ()
-            if not res_list:
-                room_list_.append(room)
-
-    room_list_ = check_room_comb(room_comb, room_list_)
-    return room_list_
+from .forms import HotelCreateForm, HotelUpdateForm, ReservationUpdateForm, ReservationRateForm
+from .models import Hotel, Reservation
+from .utils.room_utils import filter_rooms
 
 
 class HomePageView(TemplateView):
@@ -60,11 +30,19 @@ class HotelListView(ListView):
         end_date = self.request.GET.get('end_date')
         num_people = int(self.request.GET.get('num_people'))
         num_rooms = int(self.request.GET.get('num_rooms'))
+        order_by = self.request.GET.get('order_by', 'rate_')
 
-        if address:
-            hotel_list = Hotel.objects.raw(f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%'")
+        if order_by == 'rate_':
+            hotel_list = Hotel.objects.raw(
+                f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%' ORDER BY rating DESC")
+        elif order_by == 'name_':
+            hotel_list = Hotel.objects.raw(
+                f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%' ORDER BY name ASC")
+        elif order_by == 'pop__':
+            hotel_list = Hotel.objects.raw(
+                f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%' ORDER BY num_review DESC")
         else:
-            hotel_list = Hotel.objects.raw(f"SELECT * FROM hotel")
+            hotel_list = Hotel.objects.raw(f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%'")
 
         hotel_list_ = []
         for hotel in hotel_list:
@@ -81,6 +59,11 @@ class HotelListView(ListView):
         self.request.session['price_dict'] = price_dict
         self.request.session['room_dict'] = room_dict
 
+        if order_by == 'price':
+            prices = [h.price for h in hotel_list_]
+            sort_idx = sorted(range(len(prices)), key=prices.__getitem__)
+            hotel_list_ = [hotel_list_[i] for i in sort_idx]
+
         return hotel_list_
 
     def get_context_data(self, **kwargs):
@@ -88,6 +71,8 @@ class HotelListView(ListView):
         context = super().get_context_data(**kwargs)
         # Add in the publisher
         context['res_data'] = self.request.res_data
+        context['orderby'] = self.request.GET.get('orderby', 'name')
+
         return context
 
 
@@ -138,7 +123,13 @@ class ReservationListView(ListView):
     template_name = 'hotel/reservation_list.html'
 
     def get_queryset(self):  # new
-        reservation_list = Reservation.objects.raw(f"SELECT * FROM reservation WHERE customer_id = %s", [self.request.user.id])
+        reservation_list = Reservation.objects.raw(f"SELECT * FROM reservation WHERE customer_id = %s",
+                                                   [self.request.user.id])
+        for i, r in enumerate(reservation_list):
+            if r.end_date < date.today():
+                reservation_list[i].is_past = True
+            else:
+                reservation_list[i].is_past = False
         return reservation_list
 
 
@@ -146,6 +137,17 @@ class ReservationDetailView(DetailView):
     model = Reservation
     template_name = 'hotel/reservation_detail.html'
     context_object_name = 'reservation'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add in the publisher
+
+        if self.object.end_date < date.today():
+            context['is_past'] = True
+        else:
+            context['is_past'] = False
+
+        return context
 
 
 class ReservationCreateView(LoginRequiredMixin, CreateView):
@@ -211,6 +213,25 @@ class ReservationUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
         return reverse_lazy('reservation-detail', kwargs={'pk': self.object.id})
 
 
+class ReservationRateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Reservation
+    template_name = 'hotel/reservation_rate.html'
+    form_class = ReservationRateForm
+    success_url = '/'
+
+    def form_valid(self, form):
+        form.instance.user_id = self.request.user.id
+        # form.instance.rating = [int(self.request.POST.get('rating'))]
+        return super().form_valid(form)
+
+    def test_func(self):
+        reservation = self.get_object()
+        return self.request.user.id == reservation.customer_id
+
+    def get_success_url(self):
+        return reverse_lazy('reservation-list')
+
+
 class ReservationCancelView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Reservation
     template_name = 'hotel/reservation_cancel.html'
@@ -223,4 +244,3 @@ class ReservationCancelView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
 
 def about(request):
     return render(request, 'hotel/about.html', {'name': 'about'})
-

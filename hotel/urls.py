@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import HomePageView, HotelListView, HotelDetailView, HotelCreateView, HotelUpdateView, HotelDeleteView, \
-    ReservationListView, ReservationDetailView, ReservationCreateView, ReservationUpdateView, ReservationCancelView
+    ReservationListView, ReservationDetailView, ReservationCreateView, ReservationUpdateView, ReservationCancelView, \
+    ReservationRateView
 from . import views
 
 urlpatterns = [
@@ -15,5 +16,6 @@ urlpatterns = [
     path('reservation/new/', ReservationCreateView.as_view(), name='reservation-create'),
     path('reservation/<int:pk>/update/', ReservationUpdateView.as_view(), name='reservation-update'),
     path('reservation/<int:pk>/delete/', ReservationCancelView.as_view(), name='reservation-cancel'),
+    path('reservation/<int:pk>/rate/', ReservationRateView.as_view(), name='reservation-rate'),
     path('about/', views.about, name='hotel-about'),
 ]
