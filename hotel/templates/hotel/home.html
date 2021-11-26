@@ -3,10 +3,12 @@
   <div class="content-section">
     <form action="{% url 'hotel-list' %}" method="get">
       <input name="address" type="text" placeholder="Search..."> <br/>
-      <input name="start_date" type="date" placeholder="Check-in date">
-      <input name="end_date" type="date" placeholder="Check-out date"> <br/>
-      <input name="num_people" type="number" placeholder="Number of people">
-      <input name="num_rooms" type="number" placeholder="Number of rooms">
+      {% if not user.is_hotel_manager %}
+        <input name="start_date" type="date" placeholder="Check-in date">
+        <input name="end_date" type="date" placeholder="Check-out date"> <br/>
+        <input name="num_people" type="number" placeholder="Number of people">
+        <input name="num_rooms" type="number" placeholder="Number of rooms">
+      {% endif %}
       <input type="submit" />
     </form>
   </div>

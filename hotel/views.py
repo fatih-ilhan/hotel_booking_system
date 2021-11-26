@@ -26,34 +26,43 @@ class HotelListView(ListView):
         room_dict = {}
 
         address = self.request.GET.get('address')
-        start_date = self.request.GET.get('start_date')
-        end_date = self.request.GET.get('end_date')
-        num_people = int(self.request.GET.get('num_people'))
-        num_rooms = int(self.request.GET.get('num_rooms'))
-        order_by = self.request.GET.get('order_by', 'rate_')
+        start_date = self.request.GET.get('start_date', None)
+        end_date = self.request.GET.get('end_date', None)
+        num_people = int(self.request.GET.get('num_people', '0'))
+        num_rooms = int(self.request.GET.get('num_rooms', '0'))
 
-        if order_by == 'rate_':
-            hotel_list = Hotel.objects.raw(
-                f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%' ORDER BY rating DESC")
-        elif order_by == 'name_':
-            hotel_list = Hotel.objects.raw(
-                f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%' ORDER BY name ASC")
-        elif order_by == 'pop__':
-            hotel_list = Hotel.objects.raw(
-                f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%' ORDER BY num_review DESC")
+        if self.request.user.is_hotel_manager:
+            order_by = self.request.GET.get('order_by', 'name_')
+            hotel_list = Hotel.objects.raw(f"SELECT * FROM hotel WHERE (address LIKE '%%{address}%%' OR name LIKE '%%{address}%%') and manager_id = %s ORDER BY name ASC",
+                                           [self.request.user.id])
         else:
-            hotel_list = Hotel.objects.raw(f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%'")
+            order_by = self.request.GET.get('order_by', 'rate_')
+            if order_by == 'rate_':
+                hotel_list = Hotel.objects.raw(
+                    f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%' ORDER BY rating DESC")
+            elif order_by == 'name_':
+                hotel_list = Hotel.objects.raw(
+                    f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%' ORDER BY name ASC")
+            elif order_by == 'pop__':
+                hotel_list = Hotel.objects.raw(
+                    f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%' ORDER BY num_review DESC")
+            else:
+                hotel_list = Hotel.objects.raw(
+                    f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%'")
 
-        hotel_list_ = []
-        for hotel in hotel_list:
-            hotel_id = hotel.id
-            room_list_ = filter_rooms(hotel_id, start_date, end_date, num_people, num_rooms)
+        if self.request.user.is_hotel_manager:
+            hotel_list_ = hotel_list
+        else:
+            hotel_list_ = []
+            for hotel in hotel_list:
+                hotel_id = hotel.id
+                room_list_ = filter_rooms(hotel_id, start_date, end_date, num_people, num_rooms)
 
-            if room_list_:
-                hotel.price = sum([r.price for r in room_list_])
-                price_dict[hotel_id] = hotel.price
-                room_dict[hotel_id] = [r.id for r in room_list_]
-                hotel_list_.append(hotel)
+                if room_list_:
+                    hotel.price = sum([r.price for r in room_list_])
+                    price_dict[hotel_id] = hotel.price
+                    room_dict[hotel_id] = [r.id for r in room_list_]
+                    hotel_list_.append(hotel)
 
         self.request.res_data = {'start_date': start_date, 'end_date': end_date, 'num_people': num_people}
         self.request.session['price_dict'] = price_dict
@@ -66,14 +75,15 @@ class HotelListView(ListView):
 
         return hotel_list_
 
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        # Add in the publisher
-        context['res_data'] = self.request.res_data
-        context['orderby'] = self.request.GET.get('orderby', 'name')
 
-        return context
+def get_context_data(self, **kwargs):
+    # Call the base implementation first to get a context
+    context = super().get_context_data(**kwargs)
+    # Add in the publisher
+    context['res_data'] = self.request.res_data
+    context['orderby'] = self.request.GET.get('orderby', 'name')
+
+    return context
 
 
 class HotelDetailView(DetailView):
@@ -221,6 +231,12 @@ class ReservationRateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.user_id = self.request.user.id
+        num_reviews = self.object.hotel.num_review
+        rating = self.object.hotel.rating
+        new_rating = 0.99 * rating + 0.01 * self.object.rating
+        with connection.cursor() as cursor:
+            cursor.execute("UPDATE hotel SET num_review = %s, rating = %s WHERE id = %s",
+                           [num_reviews + 1, new_rating, self.object.hotel.id])
         # form.instance.rating = [int(self.request.POST.get('rating'))]
         return super().form_valid(form)
 
