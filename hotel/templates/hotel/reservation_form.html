@@ -5,7 +5,7 @@
             <form method="POST">
                 {% csrf_token %}
                 <fieldset class="form-group">
-                    <legend class="border-bottom mb-4">Book</legend>
+                    <legend class="border-bottom mb-4">Reservation</legend>
                     <h2>Hotel name: {{ request.GET.hotel_name }}</h2>
                     <h2>Dates: {{ request.GET.start_date }} - {{ request.GET.end_date }}</h2>
                     <h2>Number of People: {{ request.GET.num_people }}</h2>

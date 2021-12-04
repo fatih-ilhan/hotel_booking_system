@@ -31,7 +31,7 @@ class HotelListView(ListView):
         num_people = int(self.request.GET.get('num_people', '0'))
         num_rooms = int(self.request.GET.get('num_rooms', '0'))
 
-        if self.request.user.is_hotel_manager:
+        if self.request.user.__dict__.get('is_hotel_manager', False):
             order_by = self.request.GET.get('order_by', 'name_')
             hotel_list = Hotel.objects.raw(f"SELECT * FROM hotel WHERE (address LIKE '%%{address}%%' OR name LIKE '%%{address}%%') and manager_id = %s ORDER BY name ASC",
                                            [self.request.user.id])
@@ -50,7 +50,7 @@ class HotelListView(ListView):
                 hotel_list = Hotel.objects.raw(
                     f"SELECT * FROM hotel WHERE address LIKE '%%{address}%%' OR name LIKE '%%{address}%%'")
 
-        if self.request.user.is_hotel_manager:
+        if self.request.user.__dict__.get('is_hotel_manager', False):
             hotel_list_ = hotel_list
         else:
             hotel_list_ = []

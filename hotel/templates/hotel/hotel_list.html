@@ -33,7 +33,7 @@
               <p class="article-content">{{'Rating: '}}{{ hotel.rating }}{{'/10 with '}}{{ hotel.num_review }}{{' reviews'}}</p>
               <p class="article-content">{{'$'}}{{ hotel.price }}</p>
               <a class="btn btn-secondary btn-sm mt-1 mb-1"
-                 href="/reservation/new/?hotel_id={{hotel.id}}&hotel_name={{hotel.name}}&start_date={{res_data.start_date}}&end_date={{res_data.end_date}}&num_people={{res_data.num_people}}">Book</a>
+                 href="/reservation/new/?hotel_id={{hotel.id}}&hotel_name={{hotel.name}}&start_date={{request.res_data.start_date}}&end_date={{request.res_data.end_date}}&num_people={{request.res_data.num_people}}">Book</a>
             {% endif %}
           </div>
         </article>
