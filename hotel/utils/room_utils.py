@@ -9,6 +9,9 @@ class Node:
 
 
 def traverse_combs(out_list, root, stack=None):
+    """
+    Traverses all combinations from the given tree defined by the root node
+    """
     if root == None:
         return
 
@@ -32,7 +35,9 @@ def traverse_combs(out_list, root, stack=None):
 
 
 def find_subsets(sum_val, vals, in_val=0):
-
+    """
+    Finds all subsets (in form of a Tree) that sum to sum_val from given vals
+    """
     if sum_val < vals[0]:
         return
 
@@ -51,6 +56,9 @@ def find_subsets(sum_val, vals, in_val=0):
 
 
 def get_room_combs(num_people, num_rooms, types=(1, 2)):
+    """
+    Given num_people and num_rooms, returns possible room combinations
+    """
     types = list(types)
     types.sort()
     types = tuple(types)
@@ -68,6 +76,9 @@ def get_room_combs(num_people, num_rooms, types=(1, 2)):
 
 
 def check_room_comb(room_comb, room_list):
+    """
+    Returns the available rooms from room_list given desired room_comb
+    """
     room_comb_ = room_comb.copy()
     room_list_ = []
     for room in room_list:
@@ -82,6 +93,9 @@ def check_room_comb(room_comb, room_list):
 
 
 def filter_rooms(hotel_id, start_date, end_date, num_people, num_rooms):
+    """
+    Given hotel, dates, num_pople and num_rooms; returns a room_list if possible
+    """
     room_list = Room.objects.raw("SELECT * FROM room WHERE hotel_id = %s", [hotel_id])
     num_rooms = min(num_people, num_rooms)
 

@@ -13,7 +13,6 @@ def rating_validator(rating):
 
 
 class Hotel(models.Model):
-
     id = models.BigIntegerField(blank=True, null=False, primary_key=True)
     name = models.TextField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)

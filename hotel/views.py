@@ -233,7 +233,7 @@ class ReservationRateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         form.instance.user_id = self.request.user.id
         num_reviews = self.object.hotel.num_review
         rating = self.object.hotel.rating
-        new_rating = 0.99 * rating + 0.01 * self.object.rating
+        new_rating = 0.99 * rating + 0.01 * self.object.rating  # exponential averaging
         with connection.cursor() as cursor:
             cursor.execute("UPDATE hotel SET num_review = %s, rating = %s WHERE id = %s",
                            [num_reviews + 1, new_rating, self.object.hotel.id])
