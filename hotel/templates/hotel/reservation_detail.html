@@ -1,0 +1,21 @@
+{% extends "hotel/base.html" %}
+{% block content %}
+    <article class="media content-section">
+      <div class="media-body">
+        <div class="article-metadata">
+          <h2 class="article-title"> Reservation Details</h2>
+            {% if reservation.customer.id == user.id and not is_past %}
+              <div>
+                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'reservation-update' object.id%}">Update</a>
+                <a class="btn btn-dangerous btn-sm mt-1 mb-1" href="{% url 'reservation-cancel' object.id%}">Delete</a>
+              </div>
+            {% endif %}
+        </div>
+        <p class="text-muted">Dates: {{ reservation.start_date }}{{' - '}}{{ reservation.end_date }}</p>
+        <p class="text-muted">Hotel name: {{ reservation.hotel.name }}</p>
+        <p class="text-muted">Price: {{'$'}}{{ reservation.price }}</p>
+        <p class="text-muted">Rating: {{ reservation.rating }}</p>
+        <p class="text-muted">Reservation ID: {{ reservation.id }}</p>
+      </div>
+    </article>
+{% endblock content %}

@@ -1,0 +1,38 @@
+{% extends "hotel/base.html" %}
+{% block content %}
+    <h2><a>Upcoming Reservations</a></h2>
+    {% for reservation in object_list %}
+        {% if not reservation.is_past %}
+            <article class="media content-section">
+              <div class="media-body">
+                <h2><a class="article-title" href="{% url 'reservation-detail' reservation.id %}">Reservation ID: {{ reservation.id }}</a></h2>
+                <div class="article-metadata">
+                    <p class="text-muted">Dates: {{ reservation.start_date }}{{' - '}}{{ reservation.end_date }}</p>
+                    <p class="text-muted">Hotel name: {{ reservation.hotel.name }}</p>
+                    <p class="text-muted">Price: {{'$'}}{{ reservation.price }}</p>
+                </div>
+              </div>
+            </article>
+        {% endif %}
+    {% endfor %}
+    <h2><a>Past Reservations</a></h2>
+    {% for reservation in object_list %}
+        {% if reservation.is_past %}
+            <article class="media content-section">
+              <div class="media-body">
+                <h2><a class="article-title" href="{% url 'reservation-detail' reservation.id %}">Reservation ID: {{ reservation.id }}</a></h2>
+                <div class="article-metadata">
+                    <p class="text-muted">Dates: {{ reservation.start_date }}{{' - '}}{{ reservation.end_date }}</p>
+                    <p class="text-muted">Hotel name: {{ reservation.hotel.name }}</p>
+                    <p class="text-muted">Price: {{'$'}}{{ reservation.price }}</p>
+                    {% if reservation.rating %}
+                        <p class="text-muted">You rated: {{ reservation.rating }}{{'/10'}}</p>
+                    {% else %}
+                        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'reservation-rate' reservation.id %}">Rate</a>
+                    {% endif %}
+                </div>
+              </div>
+            </article>
+        {% endif %}
+    {% endfor %}
+{% endblock content %}
