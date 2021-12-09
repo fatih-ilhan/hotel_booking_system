@@ -16,6 +16,7 @@ def main(user, password, host='localhost', database='hbms'):
         cursor = connection.cursor()
 
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {database}")
+        # cursor.execute(f"GRANT ALL ON {database}.* TO {user}@{host}")
         connection.database = database
 
         engine = create_engine(f"mysql://{user}:{password}@{host}/{database}")
@@ -80,10 +81,10 @@ def main(user, password, host='localhost', database='hbms'):
                                                 ); 
                                              """
 
-        cursor.execute(delete_reserved_room_table_command)
-        cursor.execute(delete_reservation_table_command)
-        cursor.execute(delete_room_table_command)
-        cursor.execute(delete_hotel_table_command)
+        # cursor.execute(delete_reserved_room_table_command)
+        # cursor.execute(delete_reservation_table_command)
+        # cursor.execute(delete_room_table_command)
+        # cursor.execute(delete_hotel_table_command)
 
         cursor.execute(create_hotel_table_command)
         df = pd.read_csv('data/findhotel/formatted_data.csv')
