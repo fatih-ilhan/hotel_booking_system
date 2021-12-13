@@ -9,6 +9,8 @@ from .utils.room_utils import filter_rooms
 class HotelCreateForm(ModelForm):
     num_rooms_1 = forms.IntegerField()
     price_1 = forms.IntegerField()
+    num_rooms_2 = forms.IntegerField()
+    price_2 = forms.IntegerField()
 
     class Meta:
         model = Hotel
@@ -18,15 +20,19 @@ class HotelCreateForm(ModelForm):
         hotel = super(ModelForm, self).save(commit=True)
         with connection.cursor() as cursor:
             cursor.execute('SELECT COUNT(*) FROM hotel')
-            num_hotel = cursor.fethcone()[0]
+            num_hotel = cursor.fetchone()[0]
+            cursor.execute('SELECT id FROM hotel ORDER BY id DESC LIMIT 1;')
+            hotel_id = cursor.fetchone()[0]
             if num_hotel > 0:
-                cursor.execute('SELECT LAST_INSERT_ID() INTO @hotel;')
-                hotel_id = cursor.fetchone()[0]
+                hotel_id = hotel_id
             else:
-                hotel_id = 0
+                hotel_id = 1
             for room_no in range(1, self.cleaned_data['num_rooms_1']+1):
                 cursor.execute("INSERT INTO room(room_no, num_people, price, hotel_id) VALUES(%s, %s, %s, %s)",
                                [room_no, 1, self.cleaned_data['price_1'], hotel_id])
+            for room_no in range(1, self.cleaned_data['num_rooms_2']+1):
+                cursor.execute("INSERT INTO room(room_no, num_people, price, hotel_id) VALUES(%s, %s, %s, %s)",
+                               [room_no, 2, self.cleaned_data['price_2'], hotel_id])
         return hotel
 
 
@@ -69,8 +75,8 @@ class ReservationUpdateForm(ModelForm):
         start_date = self.cleaned_data['start_date']
         end_date = self.cleaned_data['end_date']
 
-        old_start_date = self.instance.start_date
-        old_end_date = self.instance.end_date
+        old_start_date = self.initial['start_date']
+        old_end_date = self.initial['end_date']
 
         with connection.cursor() as cursor:
             cursor.execute('SELECT room_id FROM reserved_room WHERE res_id = %s', [res_id])
@@ -102,10 +108,14 @@ class ReservationUpdateForm(ModelForm):
             if not flag:
                 available_flag = True
             else:
-                available_flag = all([r in [r_.id for r_ in room_list] for r in room_id_list])
+                available_flag = all([r[0] in [r_.id for r_ in room_list] for r in room_id_list])
 
         if available_flag:
+            n_days = (end_date - start_date).days
+            self.instance.price /= (old_end_date - old_start_date).days
+            self.instance.price *= int(n_days)
             reservation = super(ModelForm, self).save(commit=True)
+
         else:
             reservation = super(ModelForm, self).save(commit=False)
 

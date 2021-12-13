@@ -75,8 +75,8 @@ def main(user, password, host='localhost', database='hbms'):
                                                   id              INT unsigned NOT NULL AUTO_INCREMENT,
                                                   res_id          INT unsigned NOT NULL,
                                                   room_id         INT unsigned NOT NULL,
-                                                  FOREIGN KEY     (res_id) REFERENCES reservation(id),
-                                                  FOREIGN KEY     (room_id) REFERENCES room(id),
+                                                  FOREIGN KEY     (res_id) REFERENCES reservation(id) ON DELETE CASCADE,
+                                                  FOREIGN KEY     (room_id) REFERENCES room(id) ON DELETE CASCADE,
                                                   PRIMARY KEY     (id)
                                                 ); 
                                              """

@@ -10,9 +10,9 @@
                     <h2>Dates: {{ request.GET.start_date }} - {{ request.GET.end_date }}</h2>
                     <h2>Number of People: {{ request.GET.num_people }}</h2>
                     {% if price %}
-                        <h2>Price: {{'$'}}{{ price }}</h2>
+                        <h2>Daily price: {{'$'}}{{ price }}</h2>
                     {% else %}
-                        <h2>Price: {{'$'}}{{ object.price }}</h2>
+                        <h2>Daily price: {{'$'}}{{ object.price }}</h2>
                     {% endif %}
                     <h2>Confirm reservation?</h2>
                 </fieldset>

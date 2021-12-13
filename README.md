@@ -6,4 +6,5 @@
 4) Craete and fill hbms database: ``python create_db.py --user user_name --password password`` (Any user_name and password permitted to create a database in your server.)
 5) Run app: ``python manage.py runserver``.
 6) Open the host address (localhost by defaukt) on your preferred browser to access the HBMS application.
+7) Run ``python price_report.py --user user_name --password password`` to see the aggregate report results for price analysis by state and ranges.
 
