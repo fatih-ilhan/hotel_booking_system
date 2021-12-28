@@ -15,7 +15,7 @@ def main(user, password, host='localhost', database='hbms'):
                                              password=password)
         cursor = connection.cursor()
 
-        print('For single rooms ...')
+        # print('For single rooms ...')
         for comb in [[0, 50], [50, 100], [100, 150], [150, 200], [200, 300], [300, 500], [500, 1000], [1000, 10000]]:
             command = """ SELECT hotel_id FROM room JOIN hotel on room.hotel_id = hotel.id WHERE num_people = 1 AND price BETWEEN %s AND %s GROUP BY hotel_id """
             cursor.execute(command, [comb[0], comb[1]])
@@ -34,24 +34,24 @@ def main(user, password, host='localhost', database='hbms'):
             print('Number of hotels in this price range by state:', num_hotels_by_state)
             print('Number of rooms in this price range by state:', num_rooms_by_state)
 
-        print('For double rooms ...')
-        for comb in [[0, 50], [50, 100], [100, 150], [150, 200], [200, 300], [300, 500], [500, 1000], [1000, 10000]]:
-            command = """ SELECT hotel_id FROM room JOIN hotel on room.hotel_id = hotel.id WHERE num_people = 2 AND price BETWEEN %s AND %s GROUP BY hotel_id """
-            cursor.execute(command, [comb[0], comb[1]])
-            price_hotels = cursor.fetchall()
-            num_hotels = len(price_hotels)
-
-            command = """ SELECT COUNT(*), RIGHT(address, 2) FROM room JOIN hotel on room.hotel_id = hotel.id WHERE num_people = 2 AND price BETWEEN %s AND %s GROUP BY RIGHT(address, 2) """
-            cursor.execute(command, [comb[0], comb[1]])
-            num_rooms_by_state = cursor.fetchall()
-
-            command = """ SELECT COUNT(hotel_id), RIGHT(address, 2) FROM hotel LEFT JOIN room on room.hotel_id = hotel.id WHERE room_no = 1 AND num_people = 2 AND price BETWEEN %s AND %s GROUP BY RIGHT(address, 2) """
-            cursor.execute(command, [comb[0], comb[1]])
-            num_hotels_by_state = cursor.fetchall()
-
-            print('Price range in USD: ', comb)
-            print('Number of hotels in this price range by state:', num_hotels_by_state)
-            print('Number of rooms in this price range by state:', num_rooms_by_state)
+        # print('For double rooms ...')
+        # for comb in [[0, 50], [50, 100], [100, 150], [150, 200], [200, 300], [300, 500], [500, 1000], [1000, 10000]]:
+        #     command = """ SELECT hotel_id FROM room JOIN hotel on room.hotel_id = hotel.id WHERE num_people = 2 AND price BETWEEN %s AND %s GROUP BY hotel_id """
+        #     cursor.execute(command, [comb[0], comb[1]])
+        #     price_hotels = cursor.fetchall()
+        #     num_hotels = len(price_hotels)
+        #
+        #     command = """ SELECT COUNT(*), RIGHT(address, 2) FROM room JOIN hotel on room.hotel_id = hotel.id WHERE num_people = 2 AND price BETWEEN %s AND %s GROUP BY RIGHT(address, 2) """
+        #     cursor.execute(command, [comb[0], comb[1]])
+        #     num_rooms_by_state = cursor.fetchall()
+        #
+        #     command = """ SELECT COUNT(hotel_id), RIGHT(address, 2) FROM hotel LEFT JOIN room on room.hotel_id = hotel.id WHERE room_no = 1 AND num_people = 2 AND price BETWEEN %s AND %s GROUP BY RIGHT(address, 2) """
+        #     cursor.execute(command, [comb[0], comb[1]])
+        #     num_hotels_by_state = cursor.fetchall()
+        #
+        #     print('Price range in USD: ', comb)
+        #     print('Number of hotels in this price range by state:', num_hotels_by_state)
+        #     print('Number of rooms in this price range by state:', num_rooms_by_state)
 
         for state in ['TX', 'PA', 'CA', 'NY', 'WA', 'FL', 'GA', 'VA', 'NC', 'SC', 'IL']:
             command = """ SELECT AVG(price) FROM room JOIN hotel on room.hotel_id = hotel.id WHERE num_people = 1 AND RIGHT(address, 2) = %s GROUP BY hotel_id """
